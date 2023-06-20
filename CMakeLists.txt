@@ -1,11 +1,23 @@
 # https://alexreinking.com/blog/how-to-use-cmake-without-the-agonizing-pain-part-1.html
 cmake_minimum_required(VERSION 3.24)
 
+set(CMAKE_INSTALL_PREFIX "C:/Users/colton/source/repos/cxx-common-cmake/install")
+set(CMAKE_C_COMPILER "C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/Llvm/x64/bin/clang-cl.exe")
+set(CMAKE_CXX_COMPILER "C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/Llvm/x64/bin/clang-cl.exe")
+set(FOOBAR "")
+
+add_definitions(-D_HAS_STD_BYTE=0)
+
+set(GCC_COVERAGE_COMPILE_FLAGS "/EHsc")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${GCC_COVERAGE_COMPILE_FLAGS}" )
+set(CMAKE_CXX_FLAGS_PATCHED "${CMAKE_CXX_FLAGS} -Xclang -mlong-double-80" )
+
 # Bail out early for multi-config generators
 if(GENERATOR_IS_MULTI_CONFIG)
     message(FATAL_ERROR "Multi-config generators are not supported. Use Make/NMake instead")
 endif()
 
+set(CMAKE_BINARY_DIR "C:/Users/colton/source/repos/cxx-common-cmake/build")
 if(CMAKE_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR)
 	message(FATAL_ERROR "In-tree builds are not supported. Run CMake from a separate directory: cmake -B build")
 endif()
@@ -85,6 +97,19 @@ list(APPEND CMAKE_ARGS
     "-DCMAKE_CXX_FLAGS:STRING=${CMAKE_CXX_FLAGS} ${ADDITIONAL_FLAGS}"
 )
 
+# Default cache variables for all projects
+list(APPEND CMAKE_ARGS_TWO
+        "-DCMAKE_PREFIX_PATH:FILEPATH=${CMAKE_INSTALL_PREFIX}"
+        "-DCMAKE_INSTALL_PREFIX:FILEPATH=${CMAKE_INSTALL_PREFIX}"
+        "-DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}"
+        "-DGFLAGS_USE_TARGET_NAMESPACE:STRING=ON"
+        "-DBUILD_SHARED_LIBS:STRING=OFF"
+        "-DCMAKE_C_COMPILER:FILEPATH=${CMAKE_C_COMPILER}"
+        "-DCMAKE_CXX_COMPILER:FILEPATH=${CMAKE_CXX_COMPILER}"
+        "-DCMAKE_C_FLAGS:STRING=${CMAKE_C_FLAGS} ${ADDITIONAL_FLAGS}"
+        "-DCMAKE_CXX_FLAGS:STRING=${CMAKE_CXX_FLAGS_PATCHED} ${ADDITIONAL_FLAGS}"
+        )
+
 function(simple_git repo tag)
     get_filename_component(name "${repo}" NAME_WE)
     ExternalProject_Add(${name}
@@ -126,6 +151,49 @@ function(simple_submodule folder)
     )
 endfunction()
 
+function(simple_git_two repo tag)
+    get_filename_component(name "${repo}" NAME_WE)
+    ExternalProject_Add(${name}
+            GIT_REPOSITORY
+            "${repo}"
+            GIT_TAG
+            "${tag}"
+            GIT_PROGRESS
+            ON
+            CMAKE_CACHE_ARGS
+            ${CMAKE_ARGS_TWO}
+            ${ARGN}
+            CMAKE_GENERATOR
+            "Ninja"
+            )
+endfunction()
+
+function(simple_submodule_two folder)
+    set(folder_path "${CMAKE_CURRENT_SOURCE_DIR}/${folder}")
+    if(NOT EXISTS "${folder_path}" OR NOT EXISTS "${folder_path}/CMakeLists.txt")
+        message(STATUS "Submodule '${folder}' not initialized, running git...")
+        execute_process(
+                COMMAND "${GIT_EXECUTABLE}" submodule update --init
+                WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
+                COMMAND_ERROR_IS_FATAL ANY
+        )
+    endif()
+    ExternalProject_Add(${folder}
+            SOURCE_DIR
+            "${folder_path}"
+            CMAKE_CACHE_ARGS
+            ${CMAKE_ARGS}
+            ${ARGN}
+            CMAKE_GENERATOR
+            "Ninja"
+            # Always trigger the build step (necessary because there is no download step)
+            BUILD_ALWAYS
+            ON
+            )
+endfunction()
+
+add_compile_options(/Zi)
+
 simple_git(https://github.com/gflags/gflags v2.2.2)
 simple_git(https://github.com/google/glog v0.6.0)
 simple_git(https://github.com/google/googletest release-1.12.1
@@ -152,11 +220,30 @@ simple_git(https://github.com/capstone-engine/capstone 087889d # next
 simple_git(https://github.com/mrexodia/z3 65df7aef50a0986588d332fa4255ba40486ef15c
     "-DZ3_BUILD_LIBZ3_SHARED:STRING=OFF"
 )
+
+set(foobarrr "test")
+
 include(xed.cmake)
 include(llvm.cmake)
-simple_git(https://github.com/mrexodia/remill system-llvm-include
+
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
+set(
+        CMAKE_CXX_FLAGS
+        "${CMAKE_CXX_FLAGS} "
+)
+add_compile_options (-Xclang -mlong-double-80 )
+add_definitions ( -Dmlong-double-80 )
+
+add_compile_definitions(_HAS_STD_BYTE=0)
+simple_git_two(https://github.com/mrexodia/remill system-llvm-include
     "-DUSE_SYSTEM_DEPENDENCIES:STRING=ON"
     "-DREMILL_ENABLE_TESTING:STRING=OFF"
 )
-simple_submodule(alive2)
-simple_submodule(souper)
+add_compile_definitions(_HAS_STD_BYTE=0)
+
+# simple_submodule(alive2)
+# simple_submodule(souper)

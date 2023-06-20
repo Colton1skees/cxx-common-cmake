@@ -1,8 +1,8 @@
 ExternalProject_Add(llvm
     URL
-        "https://github.com/llvm/llvm-project/releases/download/llvmorg-15.0.4/llvm-project-15.0.4.src.tar.xz"
+        "https://github.com/llvm/llvm-project/releases/download/llvmorg-15.0.7/llvm-project-15.0.7.src.tar.xz"
     URL_HASH
-        "SHA256=a3112dca9bdea4095361829910b74fb6b9da8ae6e3500db67c43c540ad6072da"
+        "SHA256=8b5fcb24b4128cf04df1b0b9410ce8b1a729cb3c544e6da885d234280dedeac6"
     CMAKE_CACHE_ARGS
         ${CMAKE_ARGS}
         "-DLLVM_ENABLE_PROJECTS:STRING=clang;lld"
