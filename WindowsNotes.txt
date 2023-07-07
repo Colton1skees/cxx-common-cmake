@@ -12,8 +12,10 @@ cmake -G "Visual Studio 17 2022" -DCMAKE_C_COMPILER=clang-cl.exe -DCMAKE_CXX_COM
 
 3. In the solution explorer, right click the 'remill' project. Go to 'Properties' -> 'General' -> and set these fields accordingly:
 	- 'Platform Toolset' should be set to 'LLVM (clang-cl`
-	- 'C++ Languaged Standard' should be set to Default(ISO C++14 Standard)
-	- 'C Language Standard` should be set to `Default (Legacy MSVC)`
+	- 'C++ Languaged Standard' should be set to Default(ISO C++17 Standard)
+	- 'C Language Standard` should be set to `ISO C17 (2018) Standard`
 
 
 # Random notes to keep in mind as I document this process:
+1. 
+	- For whatever reason, you need to manually delete 'cxx-common-cmake\build\remill-prefix\src\remill-build\_deps' after each remill build attempt on windows. The build will fail otherwise.
