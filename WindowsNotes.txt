@@ -1,0 +1,17 @@
+# Requirements:
+- Visual Studio 2019 or 2022 with the Clang dev tools installed.
+
+ # Steps to build on windows:
+
+1. Setup a visual studio solution using this command: 
+cmake -G "Visual Studio 17 2022" -DCMAKE_C_COMPILER=clang-cl.exe -DCMAKE_CXX_COMPILER=clang-cl.ex -T ClangCL -A x64 -B build 
+
+2. Open solution(build\Dependencies.sln) in Visual Studio
+
+3. In the solution explorer, right click the 'remill' project. Go to 'Properties' -> 'General' -> and set these fields accordingly:
+	- 'Platform Toolset' should be set to 'LLVM (clang-cl`
+	- 'C++ Languaged Standard' should be set to Default(ISO C++14 Standard)
+	- 'C Language Standard` should be set to `Default (Legacy MSVC)`
+
+
+# Random notes to keep in mind as I document this process:
