@@ -158,5 +158,9 @@ simple_git(https://github.com/mrexodia/remill system-llvm-include
     "-DUSE_SYSTEM_DEPENDENCIES:STRING=ON"
     "-DREMILL_ENABLE_TESTING:STRING=OFF"
 )
-simple_submodule(alive2)
-simple_submodule(souper)
+
+# alive2 and souper cannot build out of the box on windows at the moment.
+IF (NOT WIN32)
+  	simple_submodule(alive2)
+	simple_submodule(souper)
+ENDIF()
