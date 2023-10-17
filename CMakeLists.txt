@@ -65,9 +65,11 @@ endfunction()
 if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND CMAKE_CXX_SIMULATE_ID STREQUAL "MSVC")
     # Suppress warnings for clang-cl builds, some of these cause compilation errors.
     set(ADDITIONAL_FLAGS
-        "-w"
+        " -w"
     )
 endif()
+
+set(ADDITIONAL_FLAGS "${ADDITIONAL_FLAGS} /d2Zi+ /Zi")
 
 # Convert a CMake list to a space-separated list
 list(JOIN ADDITIONAL_FLAGS " " ADDITIONAL_FLAGS)
@@ -126,6 +128,8 @@ function(simple_submodule folder)
     )
 endfunction()
 
+#set(CMAKE_LINKER_FLAGS_RELEASE "${CMAKE_LINKER_FLAGS_RELEASE} -")
+
 simple_git(https://github.com/gflags/gflags v2.2.2)
 simple_git(https://github.com/google/glog v0.6.0)
 simple_git(https://github.com/google/googletest release-1.12.1
@@ -153,14 +157,16 @@ simple_git(https://github.com/mrexodia/z3 65df7aef50a0986588d332fa4255ba40486ef1
     "-DZ3_BUILD_LIBZ3_SHARED:STRING=OFF"
 )
 include(xed.cmake)
+add_compile_options(-g -gcodeview)
+add_link_options(-fuse-ld=lld -g -Wl,--pdb=)
 include(llvm.cmake)
 simple_git(https://github.com/Colton1skees/remill system-llvm-include
     "-DUSE_SYSTEM_DEPENDENCIES:STRING=ON"
     "-DREMILL_ENABLE_TESTING:STRING=OFF"
 )
 
+  	simple_submodule(alive2)
 # alive2 and souper cannot build out of the box on windows at the moment.
 IF (NOT WIN32)
-  	simple_submodule(alive2)
 	simple_submodule(souper)
 ENDIF()
